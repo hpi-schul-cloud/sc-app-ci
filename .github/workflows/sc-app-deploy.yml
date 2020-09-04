@@ -9,7 +9,9 @@ on:
     # At midnight every day
     - cron: '0 0 * * *'
   workflow_dispatch:
-
+    inputs:
+      branch:
+        description: 'branch to deploy.'
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
