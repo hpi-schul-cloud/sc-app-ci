@@ -37,6 +37,10 @@ jobs:
           print (sys.version_info)          
           print(os.environ['PATH'])
         shell: python
+        
+      - name: Display the path
+        run: echo $PATH
+        shell: bash
 
       # Run the deployment
       - name: Running deployment
