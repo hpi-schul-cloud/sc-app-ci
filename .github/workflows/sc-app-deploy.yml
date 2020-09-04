@@ -41,7 +41,7 @@ jobs:
       - name: Display working directory
         run: |
           ls -la .
-          chomod a+x ./sc-app-deploy/sc-app-deploy.py
+          chmod a+x ./sc-app-deploy/sc-app-deploy.py
         shell: bash
 
       # Run the deployment
