@@ -44,5 +44,5 @@ jobs:
 
       # Run the deployment
       - name: Running deployment
-        working-directory: ./sc-app-deploy
-        run: sc-app-deploy.py ${branch_to_deploy}
+        working-directory: ../sc-app-deploy
+        run: ./sc-app-deploy.py ${branch_to_deploy}
