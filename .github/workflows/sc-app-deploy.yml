@@ -38,14 +38,12 @@ jobs:
           print(os.environ['PATH'])
         shell: python
 
-      - name: Display the working directory
-        run: pwd
-        shell: bash
-
-      - name: Display parent directory
+      - name: Display working directory
         run: ls -la .
         shell: bash
 
       # Run the deployment
       - name: Running deployment
-        run: ./sc-app-deploy/sc-app-deploy.py ${branch_to_deploy}
+        run: |
+          chomod a+x ./sc-app-deploy/sc-app-deploy.py
+          ./sc-app-deploy/sc-app-deploy.py ${branch_to_deploy}
