@@ -46,4 +46,4 @@ jobs:
 
       # Run the deployment
       - name: Running deployment
-        run: ./sc-app-deploy/sc-app-deploy.py ${{branch_to_deploy}}
+        run: ./sc-app-deploy/sc-app-deploy.py ${{ github.event.inputs.branch_to_deploy }}
