@@ -39,11 +39,11 @@ jobs:
         shell: python
 
       - name: Display working directory
-        run: ls -la .
+        run: |
+          ls -la .
+          chomod a+x ./sc-app-deploy/sc-app-deploy.py
         shell: bash
 
       # Run the deployment
       - name: Running deployment
-        run: |
-          chomod a+x ./sc-app-deploy/sc-app-deploy.py
-          ./sc-app-deploy/sc-app-deploy.py ${branch_to_deploy}
+        run: ./sc-app-deploy/sc-app-deploy.py ${branch_to_deploy}
