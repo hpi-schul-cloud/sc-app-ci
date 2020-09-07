@@ -1,0 +1,3 @@
+.vscode
+sc-app-deploy/log
+**/__pycache__/**
