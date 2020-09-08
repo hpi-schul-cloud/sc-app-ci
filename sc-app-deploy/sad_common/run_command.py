@@ -1,6 +1,6 @@
 import subprocess
 import logging
-import sadexception from sad_common.sadexception
+from sad_common.sadexception import SadException
 
 def runCommand(popenargs):
     '''
@@ -23,5 +23,4 @@ def runCommand(popenargs):
 
     logging.info("runCommand returncode: '%s'" % process.returncode)
     if process.returncode != 0:
-        raise sadexception.SadException("The process has exited with an error.")
-    
+        raise SadException("The process has exited with an error.")
