@@ -19,3 +19,6 @@ def runCommand(popenargs):
     # keep checking stdout/stderr until the child exits
     while process.poll() is None:
         check_io()
+
+    logging.info("runCommand returncode: '%s'" % process.returncode)
+    
