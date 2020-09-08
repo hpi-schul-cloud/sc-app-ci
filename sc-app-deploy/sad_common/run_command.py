@@ -21,6 +21,6 @@ def runCommand(popenargs):
     while process.poll() is None:
         check_io()
 
-    logging.info("runCommand returncode: '%s'" % process.returncode)
+    logging.debug("runCommand returncode: '%s'" % process.returncode)
     if process.returncode != 0:
         raise SadException("The process has exited with an error.")
