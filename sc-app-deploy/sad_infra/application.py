@@ -29,7 +29,11 @@ class Application:
         The servicename is constructed from two parts: <hostname>_<applicationname_short>
         E.g.: "hotfix6_server".
         '''
-        servicename = "%s_%s" % (host.hostname, self.applicationname_short)
+        if host.hostname == "test":
+            # Broken the pattern on the "test" server.
+            servicename = "%s-schul-cloud_%s" % (host.hostname, self.applicationname_short)
+        else:
+            servicename = "%s_%s" % (host.hostname, self.applicationname_short)
         return  servicename
 
     def getImage(self):
