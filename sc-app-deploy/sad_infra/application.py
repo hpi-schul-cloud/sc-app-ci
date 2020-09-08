@@ -1,6 +1,10 @@
 from sad_infra.host import Host
 
 class Application:
+    '''
+    Dataclass that stores the Docker info and the short application name of an application.
+    '''
+
     imagename = None
     # 'schulcloud/schulcloud-server'
 

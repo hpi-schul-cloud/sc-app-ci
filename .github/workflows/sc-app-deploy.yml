@@ -8,13 +8,6 @@ on:
     # At midnight every day
     - cron: '0 0 * * *'
   workflow_dispatch:
-    # Manual start
-    inputs:
-      # Offer the user to select a branch
-      branch_to_deploy:
-        description: 'Branch of the application to deploy.'
-        required: false
-        default: develop
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -28,6 +21,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
+      # Print the available Python version information
       - name: Python environment
         run: |
           import os
@@ -39,6 +33,7 @@ jobs:
           print(os.environ['PATH'])
         shell: python
 
+      # Print the working directory and allow the execution of the sc-app-deploy.py script.
       - name: Display working directory
         run: |
           ls -la .
@@ -47,4 +42,6 @@ jobs:
 
       # Run the deployment
       - name: Running deployment
-        run: ./sc-app-deploy/sc-app-deploy.py ${{ github.event.inputs.branch_to_deploy }}
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        run: ./sc-app-deploy/sc-app-deploy.py

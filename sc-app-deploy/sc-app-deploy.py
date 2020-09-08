@@ -1,47 +1,32 @@
 #!/usr/bin/env python3
-# At least Python 3.5 for subprocess.run
+
+'''
+This script deploys / updates the docker image tagged with "develop_latest" for the applications "schulcloud-server", "schulcloud-client" 
+and "schulcloud-nuxt-client" to the staging server.
+
+The script is prepared to easily switch deployment to another host. The remote user "travis" must be available on the
+remote host. The remote host must be prepared with docker swarm.
+
+The remote travis user is granted access to the remote host by a private ssh-key that is registered on that host. This key is provided
+in an encypted file travisssh.gpg, which is decypted using a secret provided by the GitHub CI.
+
+If the passphrase is not set in the CI_GITHUB_TRAVISUSER_SWARMVM_KEY environment variable, we fall back to pageant. This
+means you can use this script locally for development purposes, if your personal key is registered with the travis remote user.
+'''
+
 import sys
 import os
 import subprocess
 import logging
-import time
-from pathlib import Path
 from contextlib import redirect_stdout
 
 from sad_common.run_command import runCommand
+from sad_common.sad_logging import initLogging
 from sad_infra.application import Application
 from sad_infra.host import Host
+import sad_secrets.secret_helper
 
-def initLogging():
-    '''
-    Initializes the logger.
-    '''
-    logdir = './log'
-    Path(logdir).mkdir(parents=True, exist_ok=True)
-    timestamp = time.strftime('%Y%m%d_%H%M%S')
-    applicationName = 'sc-app-deploy'
-    logFilename = '%s/%s_%s.log' % (logdir, timestamp, applicationName)
-    logFormatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] [%(levelname)-5.5s]  %(message)s", "%Y-%m-%d %H:%M:%S")
-
-    # The logger
-    rootLogger = logging.getLogger()
-    rootLogger.setLevel(logging.DEBUG)
-    
-    # File handler
-    fileHandler = logging.FileHandler(logFilename)
-    fileHandler.setFormatter(logFormatter)
-    fileHandler.setLevel(logging.DEBUG)
-    rootLogger.addHandler(fileHandler)
-
-    # Console handler
-    consoleHandler = logging.StreamHandler()
-    consoleHandler.setFormatter(logFormatter)
-    consoleHandler.setLevel(logging.INFO)
-    rootLogger.addHandler(consoleHandler)
-    
-    logging.info('Logging initialized')
-
-def deploy(application: Application, host: Host):
+def deploy(application: Application, host: Host, decryptedSshKeyFile: str):
     '''
     Deploys the application to the given host.
     '''
@@ -54,10 +39,12 @@ def deploy(application: Application, host: Host):
     # Disable known hosts checking.
     sshOptions=['-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null']
 
-    # TODO: Get ssh access to the deployment target system
-    #openssl aes-256-cbc -K $encrypted_bce910623bb2_key -iv $encrypted_bce910623bb2_iv -in travis_rsa.enc -out .build/travis_rsa -d
-    #chmod 600 .build/travis_rsa
-    sshIdentity=['-i', '.build/%s_rsa' % remoteUser]
+    if decryptedSshKeyFile != None:
+        # Use provided ssh key
+        sshIdentity=['-i', decryptedSshKeyFile]
+    else:
+        # Try pageant
+        sshIdentity=[]
 
     # remote = <build user>@<hostname>.schul-cloud.dev
     sshRemote=['%s@%s' % (remoteUser, host.getFQDN())]
@@ -70,15 +57,11 @@ def deploy(application: Application, host: Host):
     command = sshCommand + sshOptions + sshIdentity + sshRemote + sshRemoteCommandParameters
     logging.info("Running command: '%s'" % ' '.join(command))
 
-    # /usr/bin/docker service update --force --image schulcloud/schulcloud-server:develop_latest hotfix6_server
-    # Deploy develop_latest of client, nuxt and server to "test.schul-cloud.org"
-    #	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i .build/travis_rsa travis@staging.schul-cloud.org schulcloud/schulcloud-server:$DOCKERTAG staging_server
-    #	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i .build/travis_rsa travis@hotfix$1.schul-cloud.dev schulcloud/schulcloud-server:$DOCKERTAG hotfix$1_server
-    #subprocess.run(command, check=True)
-    #subprocess.run('ls', check=True)
-    # TODO: use 'command' instead of 'ls' dummy.
-    #runCommand(command)
-    runCommand(['ls'])
+    # Run docker service update
+    # Example call: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i travisssh travis@hotfix6.schul-cloud.dev schulcloud/schulcloud-server:develop_latest hotfix6_server
+    # Example execution: /usr/bin/docker service update --force --image schulcloud/schulcloud-server:develop_latest hotfix6_server
+    runCommand(command)
+    #runCommand(['ls'])
     logging.info("Deployment '%s' complete." % application.getSwarmServicename(host))
 
     # TODO: Inform RocketChat
@@ -88,13 +71,19 @@ if __name__ == '__main__':
         initLogging()
         logging.info('Call arguments given: %s' % sys.argv[1:])
 
+        decryptedSshKeyFile = None
+        if sad_secrets.secret_helper.isPassphraseSet():
+            decryptedSshKeyFile="travisssh"
+            sad_secrets.secret_helper.gpgDecrypt(decryptedSshKeyFile)
+        else:
+            logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
+
         # Deploy to the hotfix6 host
-        hotfix6Host = Host("hotfix6", "schul-cloud.dev")
-        deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), hotfix6Host)
-        deploy(Application("client", "schulcloud/schulcloud-client", "develop_latest"), hotfix6Host)
-        deploy(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), hotfix6Host)
-        
-        #deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), Host("test", "schul-cloud.org"))
+        deployHost = Host("hotfix6", "schul-cloud.dev")
+
+        deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
+        deploy(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
+        deploy(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), deployHost, decryptedSshKeyFile)
         
         exit(0)
     except Exception as ex:

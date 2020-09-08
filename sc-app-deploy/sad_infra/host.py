@@ -1,4 +1,8 @@
 class Host:
+    '''
+    Dataclass that stores the hostname and domain of a host.
+    '''
+
     hostname = None
     domain = None
 
