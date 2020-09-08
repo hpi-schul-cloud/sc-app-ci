@@ -79,7 +79,7 @@ if __name__ == '__main__':
             logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
 
         # Deploy to the hotfix6 host
-        deployHost = Host("hotfix6", "schul-cloud.dev")
+        deployHost = Host("test", "schul-cloud.org")
 
         deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
         deploy(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
