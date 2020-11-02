@@ -84,6 +84,7 @@ if __name__ == '__main__':
         deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
         deploy(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
         deploy(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), deployHost, decryptedSshKeyFile)
+        deploy(Application("calendar", "schulcloud/schulcloud-calendar", "develop_latest"), deployHost, decryptedSshKeyFile)
         
         exit(0)
     except Exception as ex:
