@@ -1,5 +1,5 @@
 # Workflow to deploy the HPI Schul-Cloud application
-name: sc-app-deploy
+name: sc-app-feature-deploy
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
