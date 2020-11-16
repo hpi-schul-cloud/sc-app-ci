@@ -52,4 +52,4 @@ jobs:
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
         working-directory: ./sc-app-deploy
-        run: ./sc-app-deploy.py feature-deploy
+        run: ./sc-app-deploy.py feature-deploy ${{ github.event.inputs.ticket-id }} ${{ github.event.inputs.team-no }}
