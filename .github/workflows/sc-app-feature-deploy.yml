@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
     inputs:
         name:
-          description: 'Person to greet'
+          description: 'Ticket ID of feature branch'
           required: true
-          default: 'Mona the Octocat'
+          default: ''
         home:
-          description: 'location'
+          description: 'Team number'
           required: false
-          default: 'The Octoverse'
+          default: ''
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
