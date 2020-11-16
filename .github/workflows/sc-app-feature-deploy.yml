@@ -1,0 +1,45 @@
+# Workflow to deploy the HPI Schul-Cloud application
+name: sc-app-feature-deploy
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
+on:
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-18.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Print the available Python version information
+      - name: Python environment
+        run: |
+          import os
+          import sys
+          print("Python version")
+          print (sys.version)
+          print("Version info.")
+          print (sys.version_info)          
+          print(os.environ['PATH'])
+        shell: python
+
+      # Print the working directory and allow the execution of the sc-app-deploy.py script.
+      - name: Display working directory
+        run: |
+          ls -la .
+          chmod a+x ./sc-app-deploy/sc-app-deploy.py
+        shell: bash
+
+      # Run the deployment
+      - name: Running deployment
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        working-directory: ./sc-app-deploy
+        run: ./sc-app-deploy.py feature-deploy

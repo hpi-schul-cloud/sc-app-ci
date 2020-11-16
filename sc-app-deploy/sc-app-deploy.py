@@ -70,6 +70,7 @@ if __name__ == '__main__':
     try:
         initLogging()
         logging.info('Call arguments given: %s' % sys.argv[1:])
+        exit(0)
 
         decryptedSshKeyFile = None
         if sad_secrets.secret_helper.isPassphraseSet():
