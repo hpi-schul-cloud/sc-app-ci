@@ -5,6 +5,15 @@ name: sc-app-feature-deploy
 # events but only for the master branch
 on:
   workflow_dispatch:
+    inputs:
+        name:
+          description: 'Person to greet'
+          required: true
+          default: 'Mona the Octocat'
+        home:
+          description: 'location'
+          required: false
+          default: 'The Octoverse'
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -14,6 +23,10 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Echo parameter
+        run: |
+          echo "Hello ${{ github.event.inputs.name }}!"
+          echo "- in ${{ github.event.inputs.home }}!"
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
@@ -27,7 +40,6 @@ jobs:
           print("Version info.")
           print (sys.version_info)          
           print(os.environ['PATH'])
-          print("Lars was on the feature branch")
         shell: python
 
       # Print the working directory and allow the execution of the sc-app-deploy.py script.
@@ -36,7 +48,6 @@ jobs:
           ls -la .
           chmod a+x ./sc-app-deploy/sc-app-deploy.py
         shell: bash
-
       # Run the deployment
       - name: Running deployment
         env:
