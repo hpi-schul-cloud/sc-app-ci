@@ -6,11 +6,11 @@ name: sc-app-feature-deploy
 on:
   workflow_dispatch:
     inputs:
-        name:
+        ticket-id:
           description: 'Ticket ID of feature branch'
           required: true
           default: ''
-        home:
+        team-no:
           description: 'Team number'
           required: false
           default: ''
@@ -25,8 +25,7 @@ jobs:
     steps:
       - name: Echo parameter
         run: |
-          echo "Hello ${{ github.event.inputs.name }}!"
-          echo "- in ${{ github.event.inputs.home }}!"
+          echo "Deploying ${{ github.event.inputs.ticket-id }} on hotfix${{ github.event.inputs.team-no }}.hpi-schul-cloud.org"
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
