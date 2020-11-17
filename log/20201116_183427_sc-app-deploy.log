@@ -1,0 +1,2 @@
+2020-11-16 18:34:27 [MainThread  ] [INFO ]  Logging initialized
+2020-11-16 18:34:27 [MainThread  ] [INFO ]  Call arguments given: ['hello', 'world', 'of', 'lars']
