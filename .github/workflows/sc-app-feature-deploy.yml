@@ -39,7 +39,7 @@ jobs:
           print("Version info.")
           print (sys.version_info)          
           print(os.environ['PATH'])
-        shell: python
+        shell: python3
 
       # Print the working directory and allow the execution of the sc-app-deploy.py script.
       - name: Display working directory
