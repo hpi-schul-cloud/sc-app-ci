@@ -68,6 +68,15 @@ def deploy(application: Application, host: Host, decryptedSshKeyFile: str):
 
 if __name__ == '__main__':
     try:
+        if sys.version_info[0] < 3 or sys.version_info[1] < 6:
+            print("This script requires Python version 3.6")
+            print("Python version")
+            print (sys.version)
+            print("Version info.")
+            print (sys.version_info)          
+            print(os.environ['PATH'])
+            sys.exit(1)
+
         initLogging()
         logging.info('Call arguments given: %s' % sys.argv[1:])
         exit(0)
