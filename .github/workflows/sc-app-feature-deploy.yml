@@ -37,7 +37,7 @@ jobs:
         shell: bash
       # Run the deployment
       - name: Running deployment
-        if: ${{ github.event.inputs.ticket-id }} != '' &&  ${{ github.event.inputs.team-no }} != '' 
+        if: github.event.inputs.ticket-id != '' &&  github.event.inputs.team-no != '' 
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
         working-directory: ./sc-app-deploy
