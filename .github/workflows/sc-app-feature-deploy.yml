@@ -9,11 +9,11 @@ on:
         ticket-id:
           description: 'Ticket ID of feature branch'
           required: false
-          default: '1'
+          default: ''
         team-no:
           description: 'Team number'
           required: false
-          default: '2'
+          default: ''
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
@@ -49,7 +49,7 @@ jobs:
         shell: bash
       # Run the deployment
       - name: Running deployment
-        if: ${{ ${{ github.event.inputs.ticket-id }} != '' &&  ${{ github.event.inputs.team-no }} != '' }}
+        if: ${{ github.event.inputs.ticket-id }} != '' &&  ${{ github.event.inputs.team-no }} != '' 
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
         working-directory: ./sc-app-deploy
