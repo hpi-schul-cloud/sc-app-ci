@@ -29,18 +29,6 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Print the available Python version information
-      - name: Python environment
-        run: |
-          import os
-          import sys
-          print("Python version")
-          print (sys.version)
-          print("Version info.")
-          print (sys.version_info)          
-          print(os.environ['PATH'])
-        shell: /usr/bin/env python3
-
       # Print the working directory and allow the execution of the sc-app-deploy.py script.
       - name: Display working directory
         run: |
