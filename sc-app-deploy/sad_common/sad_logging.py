@@ -16,12 +16,12 @@ def initLogging():
 
     # The logger
     rootLogger = logging.getLogger()
-    rootLogger.setLevel(logging.DEBUG)
+    rootLogger.setLevel(logging.INFO)
     
     # File handler
     fileHandler = logging.FileHandler(logFilename)
     fileHandler.setFormatter(logFormatter)
-    fileHandler.setLevel(logging.DEBUG)
+    fileHandler.setLevel(logging.INFO)
     rootLogger.addHandler(fileHandler)
 
     # Console handler
@@ -30,4 +30,4 @@ def initLogging():
     consoleHandler.setLevel(logging.INFO)
     rootLogger.addHandler(consoleHandler)
     
-    logging.info('Logging initialized')
+    logging.debug('Logging initialized')

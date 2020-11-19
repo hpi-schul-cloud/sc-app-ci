@@ -31,17 +31,56 @@ def parseArguments():
     '''
     Parses the program arguments and returns the data parsed by argparse.
     '''
-    parser = argparse.ArgumentParser(description='Run S3 instance backups for the HPI Schul-Cloud application.')
+    parser = argparse.ArgumentParser(description='Deploy branch specific images of Schul-Cloud to a team assigned Docker Swarm machine.')
 
     parser.add_argument('--version', action='version', version='1.0.0')
-    parser.add_argument("-sc", "--showconfig", action='store_true', help = "Prints out the configuration that will be used, before any other action.")
-    parser.add_argument("-d", "--dailyincrement", action='store_true', help = "Creates a backup of the files that were uploaded during the last day.")
-    parser.add_argument("-s", "--syncfull", action='store_true', help = "Synchronizes the full backup of the configured instances, if scheduled for today.")
-    parser.add_argument("-va", "--validate", action='store_true', help = "Validates the existing syncfull backup. The validation checks the number of objects and the size of the buckets.")
-    parser.add_argument("-i", "--instance", action='append', dest = 'instances_to_backup', help = "Limits the scope to the specified instance. Add the name of an instance to backup as argument.")
-    parser.add_argument("-c", "--configuration", help = "Name of a yaml configuration file to use for the backup. The configuration file contains the definition of the available instances and other static configuration data.", default="s3b_test.yaml")
-    parser.add_argument("-f", "--force", action='store_true', help = "Force. If -s is specified forces a syncfull backup, even if it is not scheduled for today.")
-    parser.add_argument("-w", "--whatif", action='store_true', help = "If set no write operations are executed. rclone operations are executed with --dryrun.")
+    def add_standard_args(parser, args_to_add):
+        # each command has a slightly different use of these arguments,
+        # therefore just add the ones specified in `args_to_add`.
+        if 'team-number' in args_to_add:
+            parser.add_argument('team-number',
+                                type=int,
+                                help='the number of the team to identify the team machine')
+        if 'ticket-id' in args_to_add:
+            parser.add_argument('ticket-id',
+                            type=str,
+                            help='JIRA issue ID to identify the branch')
+
+    branch_base_names = ('develop', 'master', 'hotfix', 'feature')
+    subp = parser.add_subparsers(title='Branches', metavar='\n  '.join(branch_base_names))
+
+    # develop PARSER
+    develop_parser = subp.add_parser('develop',
+                                      usage=(' develop '),
+                                      description='Deploy latest images from develop branch')
+    develop_parser.set_defaults(func=deployDevelop)
+
+    # master PARSER
+    master_parser = subp.add_parser('master',
+                                      usage=(' master '),
+                                      description='Deploy latest images from master branch')
+    add_standard_args(master_parser,
+                      ('team-number'))
+    master_parser.set_defaults(func=deployMaster)
+
+    # hotfix PARSER
+    hotfix_parser = subp.add_parser('hotfix',
+                                      usage=(' hotfix '),
+                                      description='Deploy latest images from hotfix branch of team')
+    add_standard_args(hotfix_parser,
+                      ('team-number', 'ticket-id'))
+    hotfix_parser.set_defaults(func=deployHotFix)
+
+    # feature PARSER
+    feature_parser = subp.add_parser('feature',
+                                      usage=(' feature '),
+                                      description='Deploy latest images from feature branch of team')
+    add_standard_args(feature_parser,
+                      ('team-number', 'ticket-id'))
+    feature_parser.set_defaults(func=deployFeature)
+    parser.add_argument('--debug', '-d', dest='debug', action='store_true', default=False),
+    parser.add_argument("-w", "--whatif", action='store_true', help = "If set no deploy operations are executed.")
+
     args = parser.parse_args()
     return args
     
@@ -94,6 +133,16 @@ def deploy(application: Application, host: Host, decryptedSshKeyFile: str):
 
     # TODO: Inform RocketChat
 
+def deployMaster():
+    pass
+
+def deployHotFix():
+    pass
+
+def deployFeature():
+    pass
+
+
 def deployDevelop(application: Application, host: Host, decrytedSshKeyFile: str):
         decryptedSshKeyFile = None
         if sad_secrets.secret_helper.isPassphraseSet():
@@ -121,43 +170,17 @@ if __name__ == '__main__':
             print(os.environ['PATH'])
             sys.exit(1)
 
-        initLogging()
-        logging.info('Call arguments given: %s' % sys.argv[1:])
         parsedArgs = parseArguments()
+        initLogging()
+        if hasattr(parsedArgs, 'debug') and parsedArgs.debug:
+            rootLogger = logging.getLogger()
+            rootLogger.setLevel(logging.DEBUG)
+        logging.debug('Call arguments given: %s' % sys.argv[1:])
         exit(0)
-        if parsedArgs.whatif:
-            logWhatIfHeader()
-        if parsedArgs.showconfig:
-            logging.info("Configuration: %s" % s3_backup_config)
-        elif parsedArgs.dailyincrement or parsedArgs.syncfull or parsedArgs.validate:
-            # Evaluate which instances shall be backed up.
-            instances_to_backup = []
-            if parsedArgs.instances_to_backup:
-                # Check that all instances the user has specified are in the current configuration.
-                logging.debug('Run for specific instances: %s' % parsedArgs.instances_to_backup)
-                for instance_name_to_check in parsedArgs.instances_to_backup:
-                    instance_found = False
-                    for current_instance_name, current_instance in s3_backup_config.instances.items():
-                        if current_instance.instancename == instance_name_to_check:
-                            instance_found = True
-                            break
-                    if not instance_found:
-                        raise S3bException('Instance "%s" not found in configuration.' % instance_name_to_check)
-                # All instance names given by the command line are valid
-                instances_to_backup = parsedArgs.instances_to_backup
-            else:
-                # Use all instances in the current configuration.
-                logging.debug('Run for all instances.')
-                for current_instance_name, current_instance in s3_backup_config.instances.items():
-                    instances_to_backup.append(current_instance.instancename)
-            logging.info('The following instances are in scope: %s' % instances_to_backup)
-            # Validate the s3-backup config.
-            rclone.validate_configuration(s3_backup_config)
-            # Run the backup or validation.
-            rclone.run_backup(s3_backup_config, instances_to_backup, parsedArgs.dailyincrement, parsedArgs.syncfull, parsedArgs.validate, parsedArgs.force, parsedArgs.whatif)
+        if hasattr(args, 'func'):
+            args.func(args)
         else:
-            logging.info("No action specified. Use a parameter like -d, -s or -sc to define an action.")
-        
+            logger.info("No command given, exiting ...")
         exit(0)
     except Exception as ex:
         logging.exception(ex)
