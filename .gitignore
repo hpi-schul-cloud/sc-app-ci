@@ -1,4 +1,5 @@
 .vscode
 sc-app-deploy/log
+log
 **/__pycache__/**
 travisssh
