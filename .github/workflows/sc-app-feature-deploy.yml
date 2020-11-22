@@ -1,33 +1,35 @@
-# Workflow to deploy the HPI Schul-Cloud application
-name: sc-app-feature-deploy
-
-# Controls when the action will run. Triggers the workflow on push or pull request
-# events but only for the master branch
-on:
+on: 
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
     inputs:
-        ticket-id:
-          description: 'Ticket ID of feature branch'
-          required: false
+        branch-prefix:
+          description: 'The branch prefix to use. Either feature|develop|release|hotfix|master'
+          required: true
           default: ''
         team-no:
-          description: 'Team number'
+          description: 'Team number. Always required.'
+          required: true
+          default: ''
+        ticket-id:
+          description: 'Ticket ID of branch. Required on branch prefix feature and hotfix'
           required: false
           default: ''
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "build"
-  build:
+  deploy:
     # The type of runner that the job will run on
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Echo parameter
         run: |
-          echo "Deploying ${{ github.event.inputs.ticket-id }} on hotfix${{ github.event.inputs.team-no }}.hpi-schul-cloud.org"
+          echo "GITHUB event trigger:       ${{ github.event_name }}
+          echo "GITHUB input branch-prefix: ${{ github.event.inputs.branch-prefix }}
+          echo "GITHUB input team-no:       ${{ github.event.inputs.team-no }}
+          echo "GITHUB input ticket-id:     ${{ github.event.inputs.ticket-id }}
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
@@ -38,9 +40,44 @@ jobs:
           chmod a+x ./sc-app-deploy/sc-app-deploy.py
         shell: bash
       # Run the deployment
-      - name: Running deployment
-        if: github.event.inputs.ticket-id != '' &&  github.event.inputs.team-no != '' 
+      - name: Running scheduled deployment for develop 
+        if: github.event_name == 'schedule'
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
         working-directory: ./sc-app-deploy
-        run: ./sc-app-deploy.py feature-deploy ${{ github.event.inputs.ticket-id }} ${{ github.event.inputs.team-no }}
+        run: ./sc-app-deploy.py develop --schduled
+
+      - name: Running deployment for develop
+        if: github.event.inputs.branch-prefix == 'develop' && github.event_name != 'schedule'
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        working-directory: ./sc-app-deploy
+        run: ./sc-app-deploy.py develop ${{ github.event.inputs.team-no }}
+
+      - name: Running deployment for feature
+        if: github.event.inputs.branch-prefix == 'feature' && github.event_name != 'schedule'
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        working-directory: ./sc-app-deploy
+        run: ./sc-app-deploy.py feature ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }} 
+
+      - name: Running deployment for release
+        if: github.event.inputs.branch-prefix == 'release' && github.event_name != 'schedule'
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        working-directory: ./sc-app-deploy
+        run: ./sc-app-deploy.py release ${{ github.event.inputs.team-no }}
+
+      - name: Running deployment for hotfix
+        if: github.event.inputs.branch-prefix == 'hotfix' && github.event_name != 'schedule'
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        working-directory: ./sc-app-deploy
+        run: ./sc-app-deploy.py hotfix ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }} 
+
+      - name: Running deployment for master
+        if: github.event.inputs.branch-prefix == 'master' && github.event_name != 'schedule'
+        env:
+          CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
+        working-directory: ./sc-app-deploy
+        run: ./sc-app-deploy.py master ${{ github.event.inputs.team-no }}
