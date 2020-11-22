@@ -45,7 +45,7 @@ jobs:
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
         working-directory: ./sc-app-deploy
-        run: ./sc-app-deploy.py develop --schduled
+        run: ./sc-app-deploy.py develop --scheduled
 
       - name: Running deployment for develop
         if: github.event.inputs.branch-prefix == 'develop' && github.event_name != 'schedule'

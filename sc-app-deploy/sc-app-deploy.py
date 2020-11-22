@@ -22,7 +22,7 @@ import argparse
 from contextlib import redirect_stdout
 
 from sad_common.sad_logging import initLogging
-from sad_deploy.deploy_commands import deployDevelop, deployMaster, deployHotFix, deployFeature
+from sad_deploy.deploy_commands import deployImages
 import sad_secrets.secret_helper
 
 def parseArguments():
@@ -44,14 +44,29 @@ def parseArguments():
                             type=str,
                             help='JIRA issue ID to identify the branch')
 
-    branch_base_names = ('develop', 'master', 'hotfix', 'feature')
+    def add_develop_args(parser, args_to_add):
+        # each command has a slightly different use of these arguments,
+        # therefore just add the ones specified in `args_to_add`.
+        group = parser.add_mutually_exclusive_group()
+        if 'scheduled' in args_to_add:
+            group.add_argument('--scheduled',
+                                action='store_true', default=False,
+                                help='script is called by automatic scheduler')
+        if 'team-number' in args_to_add:
+            group.add_argument('team-number',
+                                type=int,
+                                help='the number of the team to identify the team machine')
+
+    branch_base_names = ('develop', 'master', 'release', 'hotfix', 'feature')
     subp = parser.add_subparsers(title='Branches', metavar='\n  '.join(branch_base_names))
 
     # develop PARSER
     develop_parser = subp.add_parser('develop',
                                       usage=(' develop '),
                                       description='Deploy latest images from develop branch')
-    develop_parser.set_defaults(func=deployDevelop)
+    add_develop_args(develop_parser,
+                      ('scheduled', 'team-number'))
+    develop_parser.set_defaults(func=deployImages)
 
     # master PARSER
     master_parser = subp.add_parser('master',
@@ -59,15 +74,22 @@ def parseArguments():
                                       description='Deploy latest images from master branch')
     add_standard_args(master_parser,
                       ('team-number'))
-    master_parser.set_defaults(func=deployMaster)
+    master_parser.set_defaults(func=deployImages)
 
+    # release PARSER
+    release_parser = subp.add_parser('release',
+                                      usage=(' release '),
+                                      description='Deploy latest images from release branch')
+    add_standard_args(release_parser,
+                      ('team-number'))
+    master_parser.set_defaults(func=deployImages)
     # hotfix PARSER
     hotfix_parser = subp.add_parser('hotfix',
                                       usage=(' hotfix '),
                                       description='Deploy latest images from hotfix branch of team')
     add_standard_args(hotfix_parser,
                       ('team-number', 'ticket-id'))
-    hotfix_parser.set_defaults(func=deployHotFix)
+    hotfix_parser.set_defaults(func=deployImages)
 
     # feature PARSER
     feature_parser = subp.add_parser('feature',
@@ -75,7 +97,7 @@ def parseArguments():
                                       description='Deploy latest images from feature branch of team')
     add_standard_args(feature_parser,
                       ('team-number', 'ticket-id'))
-    feature_parser.set_defaults(func=deployFeature)
+    feature_parser.set_defaults(func=deployImages)
 
     args = parser.parse_args()
     return args
@@ -95,11 +117,11 @@ if __name__ == '__main__':
         initLogging()
         parsedArgs = parseArguments()
         logging.info('Call arguments given: %s' % sys.argv[1:])
+        exit(0)
         if hasattr(parsedArgs, 'func'):
             parsedArgs.func(parsedArgs)
         else:
             logging.info("No command given, exiting ...")
-        exit(0)
     except Exception as ex:
         logging.exception(ex)
         logging.info("Deployment failed.")

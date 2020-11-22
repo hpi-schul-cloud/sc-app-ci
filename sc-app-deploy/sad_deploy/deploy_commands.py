@@ -49,14 +49,9 @@ def deploy(application: Application, host: Host, decryptedSshKeyFile: str):
 
     # TODO: Inform RocketChat
 
-def deployMaster(args):
-    logging.info("Master deployment triggered for %s" % args)
+def deployImages(args):
+    logging.info("Image deployment triggered for %s" % args)
 
-def deployHotFix(args):
-    logging.info("HotFix deployment triggered for %s" % args)
-
-def deployFeature(args):
-    logging.info("Feature deployment triggered for %s" % args)
 
 def deployDevelop(args):
     logging.info("Develop deployment triggered")
