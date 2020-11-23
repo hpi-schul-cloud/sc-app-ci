@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 '''
-This script deploys / updates the docker image tagged with "develop_latest" for the applications "schulcloud-server", "schulcloud-client" 
-and "schulcloud-nuxt-client" to the staging server.
+This script deploys / updates manually the docker images of branches if started with the ticket-id as first parameter, 
+all branches tagged "latest" for the applications "schulcloud-server", "schulcloud-client" 
+and "schulcloud-nuxt-client" on the destination environment (i.a. reused hotfix or staging server) identified with the team number as second parameter.
 
 The script is prepared to easily switch deployment to another host. The remote user "travis" must be available on the
 remote host. The remote host must be prepared with docker swarm.
