@@ -9,7 +9,7 @@ from sad_infra.application import Application
 from sad_infra.host import Host
 import sad_secrets.secret_helper
 
-def deploy(application: Application, host: Host, decryptedSshKeyFile: str):
+def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
     '''
     Deploys the application to the given host.
     '''
@@ -65,7 +65,7 @@ def deployDevelop(args):
     # Deploy to the test host
     deployHost = Host("hotfix6", "schul-cloud.dev")
 
-    deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
-    deploy(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
-    deploy(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), deployHost, decryptedSshKeyFile)
-    deploy(Application("calendar", "schulcloud/schulcloud-calendar", "develop_latest"), deployHost, decryptedSshKeyFile)
+    deployImage(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
+    deployImage(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
+    deployImage(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), deployHost, decryptedSshKeyFile)
+    deployImage(Application("calendar", "schulcloud/schulcloud-calendar", "develop_latest"), deployHost, decryptedSshKeyFile)

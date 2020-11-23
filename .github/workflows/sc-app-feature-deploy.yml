@@ -1,6 +1,10 @@
+# Workflow to deploy the HPI Schul-Cloud application
+name: sc-app-feature-deploy
+
+# Controls when the action will run. 
 on: 
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
     inputs:
         branch-prefix:
@@ -45,7 +49,8 @@ jobs:
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
         working-directory: ./sc-app-deploy
-        run: ./sc-app-deploy.py develop --scheduled
+        # 9999 as team number is a dummy to overcom argparse limitations
+        run: ./sc-app-deploy.py develop --scheduled 9999
 
       - name: Running deployment for develop
         if: github.event.inputs.branch-prefix == 'develop' && github.event_name != 'schedule'

@@ -43,19 +43,10 @@ def parseArguments():
             parser.add_argument('ticket-id',
                             type=str,
                             help='JIRA issue ID to identify the branch')
-
-    def add_develop_args(parser, args_to_add):
-        # each command has a slightly different use of these arguments,
-        # therefore just add the ones specified in `args_to_add`.
-        group = parser.add_mutually_exclusive_group()
         if 'scheduled' in args_to_add:
             group.add_argument('--scheduled',
                                 action='store_true', default=False,
                                 help='script is called by automatic scheduler')
-        if 'team-number' in args_to_add:
-            group.add_argument('team-number',
-                                type=int,
-                                help='the number of the team to identify the team machine')
 
     branch_base_names = ('develop', 'master', 'release', 'hotfix', 'feature')
     subp = parser.add_subparsers(title='Branches', metavar='\n  '.join(branch_base_names))
@@ -64,7 +55,7 @@ def parseArguments():
     develop_parser = subp.add_parser('develop',
                                       usage=(' develop '),
                                       description='Deploy latest images from develop branch')
-    add_develop_args(develop_parser,
+    add_standard_args(develop_parser,
                       ('scheduled', 'team-number'))
     develop_parser.set_defaults(func=deployImages)
 
