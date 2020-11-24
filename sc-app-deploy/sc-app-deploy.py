@@ -45,7 +45,7 @@ def parseArguments():
                             type=str,
                             help='JIRA issue ID to identify the branch')
         if 'scheduled' in args_to_add:
-            group.add_argument('--scheduled',
+            parser.add_argument('--scheduled',
                                 action='store_true', default=False,
                                 help='script is called by automatic scheduler')
 
@@ -74,7 +74,7 @@ def parseArguments():
                                       description='Deploy latest images from release branch')
     add_standard_args(release_parser,
                       ('team-number'))
-    master_parser.set_defaults(func=deployImages)
+    release_parser.set_defaults(func=deployImages)
     # hotfix PARSER
     hotfix_parser = subp.add_parser('hotfix',
                                       usage=(' hotfix '),
@@ -109,9 +109,8 @@ if __name__ == '__main__':
         initLogging()
         parsedArgs = parseArguments()
         logging.info('Call arguments given: %s' % sys.argv[1:])
-        exit(0)
         if hasattr(parsedArgs, 'func'):
-            parsedArgs.func(parsedArgs)
+            parsedArgs.func(sys.argv[1], parsedArgs)
         else:
             logging.info("No command given, exiting ...")
     except Exception as ex:

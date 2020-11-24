@@ -9,6 +9,11 @@ from sad_infra.application import Application
 from sad_infra.host import Host
 import sad_secrets.secret_helper
 
+team_target_postfix = "schul-cloud.dev"
+auto_target_postfix = "schul-cloud.org"
+team_host_name_prefix = "hotfix"
+auto_host_name = "test"
+
 def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
     '''
     Deploys the application to the given host.
@@ -49,8 +54,15 @@ def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
 
     # TODO: Inform RocketChat
 
-def deployImages(args):
+def deployImages(branch, args):
     logging.info("Image deployment triggered for %s" % args)
+    if hasattr(args, "scheduled") & args.scheduled == True:
+        # Deploy to the test host
+        deployHost = Host("%s" % (auto_target_postfix) , auto_target_postfix)
+    else:
+        # Deploy to the team host
+        deployHost = Host("%s%d" % (team_host_name_prefix, args) , team_target_postfix)
+    logging.info("Deployment triggered for %s branch on %d" % branch, args.team-number)
 
 
 def deployDevelop(args):
