@@ -36,12 +36,12 @@ def parseArguments():
     def add_standard_args(parser, args_to_add):
         # each command has a slightly different use of these arguments,
         # therefore just add the ones specified in `args_to_add`.
-        if 'team-number' in args_to_add:
-            parser.add_argument('team-number',
+        if 'team_number' in args_to_add:
+            parser.add_argument('team_number',
                                 type=int,
                                 help='the number of the team to identify the team machine')
-        if 'ticket-id' in args_to_add:
-            parser.add_argument('ticket-id',
+        if 'ticket_id' in args_to_add:
+            parser.add_argument('ticket_id',
                             type=str,
                             help='JIRA issue ID to identify the branch')
         if 'scheduled' in args_to_add:
@@ -57,7 +57,7 @@ def parseArguments():
                                       usage=(' develop '),
                                       description='Deploy latest images from develop branch')
     add_standard_args(develop_parser,
-                      ('scheduled', 'team-number'))
+                      ('scheduled', 'team_number'))
     develop_parser.set_defaults(func=deployImages)
 
     # master PARSER
@@ -65,7 +65,7 @@ def parseArguments():
                                       usage=(' master '),
                                       description='Deploy latest images from master branch')
     add_standard_args(master_parser,
-                      ('team-number'))
+                      ('team_number'))
     master_parser.set_defaults(func=deployImages)
 
     # release PARSER
@@ -73,14 +73,14 @@ def parseArguments():
                                       usage=(' release '),
                                       description='Deploy latest images from release branch')
     add_standard_args(release_parser,
-                      ('team-number'))
+                      ('team_number'))
     release_parser.set_defaults(func=deployImages)
     # hotfix PARSER
     hotfix_parser = subp.add_parser('hotfix',
                                       usage=(' hotfix '),
                                       description='Deploy latest images from hotfix branch of team')
     add_standard_args(hotfix_parser,
-                      ('team-number', 'ticket-id'))
+                      ('team_number', 'ticket_id'))
     hotfix_parser.set_defaults(func=deployImages)
 
     # feature PARSER
@@ -88,7 +88,7 @@ def parseArguments():
                                       usage=(' feature '),
                                       description='Deploy latest images from feature branch of team')
     add_standard_args(feature_parser,
-                      ('team-number', 'ticket-id'))
+                      ('team_number', 'ticket_id'))
     feature_parser.set_defaults(func=deployImages)
 
     args = parser.parse_args()

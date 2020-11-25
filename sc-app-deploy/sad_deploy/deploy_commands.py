@@ -13,6 +13,8 @@ team_target_postfix = "schul-cloud.dev"
 auto_target_postfix = "schul-cloud.org"
 team_host_name_prefix = "hotfix"
 auto_host_name = "test"
+docker_namespace = "schulcloud"
+sc_image_list = ["schulcloud-server", "schulcloud-client", "schulcloud-nuxt-client", "schulcloud-calendar"]
 
 def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
     '''
@@ -56,14 +58,20 @@ def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
 
 def deployImages(branch, args):
     logging.info("Image deployment triggered for %s" % args)
-    if hasattr(args, "scheduled") & args.scheduled == True:
+    testmode = os.environ.get("TESTMODE")
+    if hasattr(args, "scheduled") & args.scheduled == True & (testmode == None):
         # Deploy to the test host
         deployHost = Host("%s" % (auto_target_postfix) , auto_target_postfix)
     else:
         # Deploy to the team host
-        deployHost = Host("%s%d" % (team_host_name_prefix, args) , team_target_postfix)
-    logging.info("Deployment triggered for %s branch on %d" % branch, args.team-number)
-
+        deployHost = Host("%s%d" % (team_host_name_prefix, args.team_number) , team_target_postfix)
+    logging.info("Deployment triggered for {} branch on {}".format(branch, args.team_number))
+    decryptedSshKeyFile = None
+    if sad_secrets.secret_helper.isPassphraseSet():
+        decryptedSshKeyFile="travisssh"
+        sad_secrets.secret_helper.gpgDecrypt(decryptedSshKeyFile)
+    else:
+        logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
 
 def deployDevelop(args):
     logging.info("Develop deployment triggered")
