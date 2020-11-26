@@ -3,6 +3,8 @@ import os
 import subprocess
 import logging
 from contextlib import redirect_stdout
+import sad_common
+from sad_common.docker_helper import dockerRegistryCheckTag, dockerRegistryLogin
 
 from sad_common.run_command import runCommand
 from sad_infra.application import Application
@@ -14,7 +16,12 @@ auto_target_postfix = "schul-cloud.org"
 team_host_name_prefix = "hotfix"
 auto_host_name = "test"
 docker_namespace = "schulcloud"
-sc_image_list = ["schulcloud-server", "schulcloud-client", "schulcloud-nuxt-client", "schulcloud-calendar"]
+sc_image_list = [
+    {'image_name': "schulcloud-server", 'application_name': "server"},
+    {'image_name': "schulcloud-client", 'application_name': "client"},
+    {'image_name': "schulcloud-nuxt-client", 'application_name': "nuxtclient"},
+    {'image_name': "schulcloud-calendar", 'application_name': "calendar" }
+]
 
 def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
     '''
@@ -59,9 +66,13 @@ def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
 def deployImages(branch, args):
     logging.info("Image deployment triggered for %s" % args)
     testmode = os.environ.get("TESTMODE")
-    if hasattr(args, "scheduled") & args.scheduled == True & (testmode == None):
+    tag_middle = ''
+    if hasattr(args, "ticket_id"):
+        tag_middle = '_' + args.ticket_id
+    tag_to_deploy = branch + tag_middle + "_" + "latest"
+    if hasattr(args, "scheduled") and args.scheduled == True and (testmode == None):
         # Deploy to the test host
-        deployHost = Host("%s" % (auto_target_postfix) , auto_target_postfix)
+        deployHost = Host(auto_host_name , auto_target_postfix)
     else:
         # Deploy to the team host
         deployHost = Host("%s%d" % (team_host_name_prefix, args.team_number) , team_target_postfix)
@@ -72,20 +83,7 @@ def deployImages(branch, args):
         sad_secrets.secret_helper.gpgDecrypt(decryptedSshKeyFile)
     else:
         logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
-
-def deployDevelop(args):
-    logging.info("Develop deployment triggered")
-    decryptedSshKeyFile = None
-    if sad_secrets.secret_helper.isPassphraseSet():
-        decryptedSshKeyFile="travisssh"
-        sad_secrets.secret_helper.gpgDecrypt(decryptedSshKeyFile)
-    else:
-        logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
-
-    # Deploy to the test host
-    deployHost = Host("hotfix6", "schul-cloud.dev")
-
-    deployImage(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
-    deployImage(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
-    deployImage(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), deployHost, decryptedSshKeyFile)
-    deployImage(Application("calendar", "schulcloud/schulcloud-calendar", "develop_latest"), deployHost, decryptedSshKeyFile)
+    auth = dockerRegistryLogin()
+    for sc_image in sc_image_list:
+        if dockerRegistryCheckTag(auth, sc_image['image_name'], tag_to_deploy):
+            deployImage(Application(sc_image['application_name'], docker_namespace + '/' + sc_image['image_name'], tag_to_deploy), deployHost, decryptedSshKeyFile)
