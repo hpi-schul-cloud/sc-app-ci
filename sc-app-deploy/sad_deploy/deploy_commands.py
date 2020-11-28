@@ -1,3 +1,4 @@
+from logging import exception
 import sys
 import os
 import subprocess
@@ -85,7 +86,11 @@ def deployImages(branch, args):
         logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
     drh = DockerRegistry(docker_namespace)
     drh.dockerRegistryLogin()
+    no_images_deployed = 0
     for sc_image in sc_image_list:
         if drh.dockerRegistryCheckTag(sc_image['image_name'], tag_to_deploy):
             app = Application(sc_image['application_name'], docker_namespace + '/' + sc_image['image_name'], tag_to_deploy)
             deployImage(app, deployHost, decryptedSshKeyFile)
+            no_images_deployed += 1
+    if no_images_deployed == 0:
+        raise Exception("No images deploy, tag {} may not exist for the branch prefix {}".format(tag_to_deploy, branch))
