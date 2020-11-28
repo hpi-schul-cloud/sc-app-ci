@@ -35,13 +35,13 @@ jobs:
           echo "GITHUB input team-no:       ${{ github.event.inputs.team-no }}
           echo "GITHUB input ticket-id:     ${{ github.event.inputs.ticket-id }}
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
 
       - name: Set Environment
         env:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
           DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
           DOCKER_TOKEN: ${{secrets.DOCKER_TOKEN}}
+      - uses: actions/checkout@v2
 
       # Print the working directory and allow the execution of the sc-app-deploy.py script.
       - name: Display working directory
