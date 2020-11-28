@@ -31,10 +31,10 @@ class DockerRegistry:
         tags_url = f"{self.base_url}/repositories/{self.docker_namespace}/{repo_name}/tags/{tag}"
         tags_req = requests.get(tags_url, headers=self.auth_headers)
         if tags_req.status_code == 200:
-            logging.info("Tag exists")
+            logging.info("Tag '{}' exists in repository: '{}'".format(tag, repo_name))
             return True
         else:
-            logging.error("Tags does not exists")
+            logging.error("Tags '{}' does not exists in repository: '{}'".format(tag, repo_name))
             return False
 
 if __name__ == "__main__":

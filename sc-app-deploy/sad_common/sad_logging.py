@@ -21,7 +21,7 @@ def initLogging():
     # File handler
     fileHandler = logging.FileHandler(logFilename)
     fileHandler.setFormatter(logFormatter)
-    fileHandler.setLevel(logging.INFO)
+    fileHandler.setLevel(logging.DEBUG)
     rootLogger.addHandler(fileHandler)
 
     # Console handler
