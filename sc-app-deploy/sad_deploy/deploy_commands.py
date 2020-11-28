@@ -4,7 +4,7 @@ import subprocess
 import logging
 from contextlib import redirect_stdout
 import sad_common
-from sad_common.docker_helper import dockerRegistryCheckTag, dockerRegistryLogin
+from sad_common.docker_helper import DockerRegistry
 
 from sad_common.run_command import runCommand
 from sad_infra.application import Application
@@ -83,7 +83,9 @@ def deployImages(branch, args):
         sad_secrets.secret_helper.gpgDecrypt(decryptedSshKeyFile)
     else:
         logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
-    auth = dockerRegistryLogin()
+    drh = DockerRegistry(docker_namespace)
+    drh.dockerRegistryLogin()
     for sc_image in sc_image_list:
-        if dockerRegistryCheckTag(auth, sc_image['image_name'], tag_to_deploy):
-            deployImage(Application(sc_image['application_name'], docker_namespace + '/' + sc_image['image_name'], tag_to_deploy), deployHost, decryptedSshKeyFile)
+        if drh.dockerRegistryCheckTag(sc_image['image_name'], tag_to_deploy):
+            app = Application(sc_image['application_name'], docker_namespace + '/' + sc_image['image_name'], tag_to_deploy)
+            deployImage(app, deployHost, decryptedSshKeyFile)
