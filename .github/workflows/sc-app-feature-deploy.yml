@@ -25,6 +25,8 @@ jobs:
   deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
     env:
       CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -41,8 +43,6 @@ jobs:
           echo "GITHUB input branch-prefix: ${{ github.event.inputs.branch-prefix }}
           echo "GITHUB input team-no:       ${{ github.event.inputs.team-no }}
           echo "GITHUB input ticket-id:     ${{ github.event.inputs.ticket-id }}
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
 
       - name: Display working directory
         run: |
