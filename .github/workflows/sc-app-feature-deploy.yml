@@ -42,9 +42,9 @@ jobs:
           CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-      run: |
-        pwd
-      shell: bash
+        run: |
+          pwd
+        shell: bash
 
       # Print the working directory and allow the execution of the sc-app-deploy.py script.
       - name: Display working directory
