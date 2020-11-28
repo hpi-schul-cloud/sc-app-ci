@@ -48,7 +48,7 @@ jobs:
         run: |
           ls -la .
           env
-          chmod a+x ./sc-app-deploy/sc-app-deploy.py
+          chmod a+x ./sc-app-deploy.py
         shell: bash
       # Run the deployment based on the arguments given
       - name: Running scheduled deployment for develop 
