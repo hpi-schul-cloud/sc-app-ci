@@ -34,7 +34,7 @@ class DockerRegistry:
             logging.info("Tag '{}' exists in repository: '{}'".format(tag, repo_name))
             return True
         else:
-            logging.error("Tags '{}' does not exists in repository: '{}'".format(tag, repo_name))
+            logging.warning("Tags '{}' does not exists in repository: '{}'".format(tag, repo_name))
             return False
 
 if __name__ == "__main__":

@@ -93,4 +93,4 @@ def deployImages(branch, args):
             deployImage(app, deployHost, decryptedSshKeyFile)
             no_images_deployed += 1
     if no_images_deployed == 0:
-        raise Exception("No images deploy, tag {} may not exist for the branch prefix {}".format(tag_to_deploy, branch))
+        raise Exception("No images deployed, tag '{}' may not exist for any image on the branch prefix '{}'".format(tag_to_deploy, branch))
