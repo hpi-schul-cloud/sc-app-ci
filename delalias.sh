@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# Set manualy in the environment
 USERNAME="docker_username"
 PASSWORD="docker_password"
 ORGANIZATION="organization"

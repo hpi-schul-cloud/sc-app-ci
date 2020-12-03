@@ -41,5 +41,5 @@ if __name__ == "__main__":
     drh = DockerRegistry ("schulcloud")
     repo = "schulcloud-server"
     logging.info("==> Logging into DockerHub")
-    headers = drh.dockerRegistryLogin()
+    drh.dockerRegistryLogin()
     tag_exists = drh.dockerRegistryCheckTag(repo, "develop_latest")
