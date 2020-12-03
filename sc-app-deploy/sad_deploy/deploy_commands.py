@@ -68,9 +68,18 @@ def deployImages(branch, args):
     logging.info("Image deployment triggered for %s" % args)
     testmode = os.environ.get("TESTMODE")
     tag_middle = ''
+    # Branch prefix and "latest" qualifier must be lowercase
+    branch = str(branch).lower()
+    tag_qualifier = "latest".lower()
+    
     if hasattr(args, "ticket_id"):
-        tag_middle = '_' + args.ticket_id
-    tag_to_deploy = branch + tag_middle + "_" + "latest"
+        if branch == 'release' or branch == 'master':
+            # Version spezification is with loer case letters
+            tag_middle = ('_' + args.ticket_id).lower()
+        else:
+            # Ticket ID will be always in uppercase letters
+            tag_middle = ('_' + args.ticket_id).upper()
+    tag_to_deploy = branch + tag_middle + "_" + tag_qualifier
     if hasattr(args, "scheduled") and args.scheduled == True and (testmode == None):
         # Deploy to the test host
         deployHost = Host(auto_host_name , auto_target_postfix)

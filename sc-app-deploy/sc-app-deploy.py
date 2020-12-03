@@ -65,7 +65,7 @@ def parseArguments():
                                       usage=(' master '),
                                       description='Deploy latest images from master branch')
     add_standard_args(master_parser,
-                      ('team_number'))
+                      ('team_number', 'ticket_id'))
     master_parser.set_defaults(func=deployImages)
 
     # release PARSER
@@ -73,7 +73,7 @@ def parseArguments():
                                       usage=(' release '),
                                       description='Deploy latest images from release branch')
     add_standard_args(release_parser,
-                      ('team_number'))
+                      ('team_number', 'ticket_id'))
     release_parser.set_defaults(func=deployImages)
     # hotfix PARSER
     hotfix_parser = subp.add_parser('hotfix',
