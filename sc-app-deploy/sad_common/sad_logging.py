@@ -16,7 +16,7 @@ def initLogging():
 
     # The logger
     rootLogger = logging.getLogger()
-    rootLogger.setLevel(logging.INFO)
+    rootLogger.setLevel(logging.DEBUG)
     
     # File handler
     fileHandler = logging.FileHandler(logFilename)

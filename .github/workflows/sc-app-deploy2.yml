@@ -1,35 +1,46 @@
-# Workflow to deploy the HPI Schul-Cloud application
+# Workflow to deploy the HPI Schul-Cloud application either the develop branch scheduled to the current test instance
+#          or manually deploy images with *_latest tag  to an instance on a team assigned machine.
+# The later invocation query parameters at start to identify the image tag to be deployed.
+# Parameters:
+#   branch-prefix : feature|develop|release|hotfix|master
+#   team-no       : the team number to identify the machine hotfix<team-no>.schul-cloud.dev
+#   ticket-id     : either the JIRA ticket-id used in the branch or the version numer for release and master branches
+
 name: sc-app-deploy
 
-# Controls when the action will run. 
-on: 
+# Controls when the action will run.
+on:
   schedule:
-    - cron: '0 0 * * *'
+    # At midnight every day
+    - cron: "0 0 * * *"
   workflow_dispatch:
+    # Manual invocation
     inputs:
-        branch-prefix:
-          description: 'The branch prefix to use. Either feature|develop|release|hotfix|master'
-          required: true
-          default: ''
-        team-no:
-          description: 'Team number. Always required.'
-          required: true
-          default: ''
-        ticket-id:
-          description: 'Ticket ID of feature or hotfix branch. Version number on master and release branch'
-          required: false
-          default: ''
+      branch-prefix:
+        description: "The branch prefix to use. Either feature|develop|release|hotfix|master"
+        required: true
+        default: ""
+      team-no:
+        description: "Team number. Always required."
+        required: true
+        default: ""
+      ticket-id:
+        description: "Ticket ID on feature or hotfix branch. Version number on master and release branch"
+        required: false
+        default: ""
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
+  # This workflow contains a single job called "deploy"
   deploy:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     env:
+      # Setting environment variables here make them available for all steps
       CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
     defaults:
+      # Setting defaults for all steps, this require the first action must check-out the code
       run:
         working-directory: ./sc-app-deploy
 
@@ -45,13 +56,14 @@ jobs:
           echo "GITHUB input ticket-id:     ${{ github.event.inputs.ticket-id }}
 
       - name: Display working directory
+        # Just for failure analysis to track down possible issues occurring for invalid host configurations
         run: |
           ls -la .
           env
           chmod a+x ./sc-app-deploy.py
         shell: bash
       # Run the deployment based on the arguments given
-      - name: Running scheduled deployment for develop 
+      - name: Running scheduled deployment for develop
         if: github.event_name == 'schedule'
         # 9999 as team number is a dummy to overcom argparse limitations
         run: ./sc-app-deploy.py develop --scheduled 9999
@@ -62,18 +74,18 @@ jobs:
 
       - name: Running deployment for feature
         if: github.event.inputs.branch-prefix == 'feature' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py feature ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }} 
+        run: ./sc-app-deploy.py feature ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
 
       - name: Running deployment for release
         # Ticket ID will be used as version number
         if: github.event.inputs.branch-prefix == 'release' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py release ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }} 
+        run: ./sc-app-deploy.py release ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
 
       - name: Running deployment for hotfix
         if: github.event.inputs.branch-prefix == 'hotfix' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py hotfix ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }} 
+        run: ./sc-app-deploy.py hotfix ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
 
       - name: Running deployment for master
         # Ticket ID will be used as version number
         if: github.event.inputs.branch-prefix == 'master' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py master ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }} 
+        run: ./sc-app-deploy.py master ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}

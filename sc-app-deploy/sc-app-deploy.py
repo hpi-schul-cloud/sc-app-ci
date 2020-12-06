@@ -17,22 +17,22 @@ means you can use this script locally for development purposes, if your personal
 
 import sys
 import os
-import subprocess
 import logging
 import argparse
-from contextlib import redirect_stdout
 
 from sad_common.sad_logging import initLogging
 from sad_deploy.deploy_commands import deployImages
-import sad_secrets.secret_helper
 
 def parseArguments():
     '''
     Parses the program arguments and returns the data parsed by argparse.
     '''
-    parser = argparse.ArgumentParser(description='Deploy branch specific images of Schul-Cloud to a team assigned Docker Swarm machine.')
+    parser = argparse.ArgumentParser(description='Deploy branch specific images of Schul-Cloud to a team assigned Docker Swarm machine.'
+            , add_help=True
+            , epilog="Get individual help for a branch prefix by adding --help to the branch."
+    )
 
-    parser.add_argument('--version', action='version', version='1.0.0')
+    parser.add_argument('--version', action='version', version='1.1.0')
     def add_standard_args(parser, args_to_add):
         # each command has a slightly different use of these arguments,
         # therefore just add the ones specified in `args_to_add`.
@@ -49,12 +49,10 @@ def parseArguments():
                                 action='store_true', default=False,
                                 help='script is called by automatic scheduler')
 
-    branch_base_names = ('develop', 'master', 'release', 'hotfix', 'feature')
-    subp = parser.add_subparsers(title='Branches', metavar='\n  '.join(branch_base_names))
+    subp = parser.add_subparsers(required=False)
 
     # develop PARSER
     develop_parser = subp.add_parser('develop',
-                                      usage=(' develop '),
                                       description='Deploy latest images from develop branch')
     add_standard_args(develop_parser,
                       ('scheduled', 'team_number'))
@@ -62,7 +60,6 @@ def parseArguments():
 
     # master PARSER
     master_parser = subp.add_parser('master',
-                                      usage=(' master '),
                                       description='Deploy latest images from master branch')
     add_standard_args(master_parser,
                       ('team_number', 'ticket_id'))
@@ -70,14 +67,12 @@ def parseArguments():
 
     # release PARSER
     release_parser = subp.add_parser('release',
-                                      usage=(' release '),
                                       description='Deploy latest images from release branch')
     add_standard_args(release_parser,
                       ('team_number', 'ticket_id'))
     release_parser.set_defaults(func=deployImages)
     # hotfix PARSER
     hotfix_parser = subp.add_parser('hotfix',
-                                      usage=(' hotfix '),
                                       description='Deploy latest images from hotfix branch of team')
     add_standard_args(hotfix_parser,
                       ('team_number', 'ticket_id'))
@@ -85,7 +80,6 @@ def parseArguments():
 
     # feature PARSER
     feature_parser = subp.add_parser('feature',
-                                      usage=(' feature '),
                                       description='Deploy latest images from feature branch of team')
     add_standard_args(feature_parser,
                       ('team_number', 'ticket_id'))

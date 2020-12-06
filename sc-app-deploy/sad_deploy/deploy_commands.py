@@ -1,3 +1,9 @@
+""" Deploy module
+This module handles the deployment of tags identified by the branch, 
+a Ticket-ID or version number to the destination team machine.
+The application which will be deployed are specified in the dictionary sc_image_list. 
+Adding more applications just need to be added in that dictionary.
+"""
 from logging import exception
 import sys
 import os
@@ -12,11 +18,15 @@ from sad_infra.application import Application
 from sad_infra.host import Host
 import sad_secrets.secret_helper
 
+# DNS parts for team machines
 team_target_postfix = "schul-cloud.dev"
-auto_target_postfix = "schul-cloud.org"
 team_host_name_prefix = "hotfix"
+# DNS parts for scheduled deployment
+auto_target_postfix = "schul-cloud.org"
 auto_host_name = "test"
+# Works currently for images of the specified namespace only
 docker_namespace = "schulcloud"
+# Dictionary of the applications which will be tried to deploy
 sc_image_list = [
     {'image_name': "schulcloud-server", 'application_name': "server"},
     {'image_name': "schulcloud-client", 'application_name': "client"},
@@ -26,7 +36,7 @@ sc_image_list = [
 
 def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
     '''
-    Deploys the application to the given host.
+    Deploys a single application to the given host.
     '''
     logging.info("Deploying '%s'..." % application.getSwarmServicename(host))
 
@@ -65,6 +75,10 @@ def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
     # TODO: Inform RocketChat
 
 def deployImages(branch, args):
+    """ deployImages
+    The function loops of the sc_image_list dictionary 
+    and call deployImage if the tag for the application images exist on the docker registry
+    """
     logging.info("Image deployment triggered for %s" % args)
     testmode = os.environ.get("TESTMODE")
     tag_middle = ''
@@ -102,4 +116,5 @@ def deployImages(branch, args):
             deployImage(app, deployHost, decryptedSshKeyFile)
             no_images_deployed += 1
     if no_images_deployed == 0:
+        # Without checking that at least on tag has been deploy the abort of the calling job would not be possible
         raise Exception("No images deployed, tag '{}' may not exist for any image on the branch prefix '{}'".format(tag_to_deploy, branch))
