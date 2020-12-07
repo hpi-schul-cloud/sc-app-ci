@@ -1,3 +1,16 @@
+"""
+This script supports remotely adding and deleting alias in repositories stored at Docker hub.
+It is not designed to be used as module but as a standalone helper script, to create additional
+aliases during development and add the ability to delete them.
+
+The credentials used to access Docker Hub has to be set as environment variables
+- DOCKER_USERNAME
+- DOCKER_TOKEN
+PLease note that for deleting aliases the DOCKER_TOKER must be the real password of DOCKER_USERNAME,
+the accces token does not work here.
+
+Parameters specification is available while calling the script with option --help
+"""
 from logging import INFO
 import os
 from os import name
