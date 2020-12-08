@@ -24,7 +24,7 @@ on:
         description: "Team number. Always required."
         required: true
         default: ""
-      ticket-id:
+      tag-qualifier:
         description: "Ticket ID on feature or hotfix branch. Version number on master and release branch"
         required: false
         default: ""
@@ -53,7 +53,7 @@ jobs:
           echo "GITHUB event trigger:       ${{ github.event_name }}
           echo "GITHUB input branch-prefix: ${{ github.event.inputs.branch-prefix }}
           echo "GITHUB input team-no:       ${{ github.event.inputs.team-no }}
-          echo "GITHUB input ticket-id:     ${{ github.event.inputs.ticket-id }}
+          echo "GITHUB input tag-qualifier: ${{ github.event.inputs.tag-qualifier }}
 
       - name: Display working directory
         # Just for failure analysis to track down possible issues occurring for invalid host configurations
@@ -65,27 +65,27 @@ jobs:
       # Run the deployment based on the arguments given
       - name: Running scheduled deployment for develop
         if: github.event_name == 'schedule'
-        # 9999 as team number is a dummy to overcom argparse limitations
-        run: ./sc-app-deploy.py develop --scheduled 9999
+        # Target for deployment is the test instance of development branch
+        run: ./sc-app-deploy.py --deployhost test --branchprefix develop
 
       - name: Running deployment for develop
         if: github.event.inputs.branch-prefix == 'develop' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py develop ${{ github.event.inputs.team-no }}
+        run: ./sc-app-deploy.py --deployhost team --branchprefix develop --teamnumber ${{ github.event.inputs.team-no }}
 
       - name: Running deployment for feature
         if: github.event.inputs.branch-prefix == 'feature' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py feature ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
+        run: ./sc-app-deploy.py --deployhost team --branchprefix feature --teamnumber ${{ github.event.inputs.team-no }} --jiraid ${{ github.event.inputs.tag-qualifier }}
 
       - name: Running deployment for release
         # Ticket ID will be used as version number
         if: github.event.inputs.branch-prefix == 'release' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py release ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
+        run: ./sc-app-deploy.py --deployhost team --branchprefix release --teamnumber ${{ github.event.inputs.team-no }} --imageversion ${{ github.event.inputs.tag-qualifier }}
 
       - name: Running deployment for hotfix
         if: github.event.inputs.branch-prefix == 'hotfix' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py hotfix ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
+        run: ./sc-app-deploy.py --deployhost team --branchprefix hotfix --teamnumber ${{ github.event.inputs.team-no }} --jiraid ${{ github.event.inputs.tag-qualifier }}
 
       - name: Running deployment for master
         # Ticket ID will be used as version number
         if: github.event.inputs.branch-prefix == 'master' && github.event_name != 'schedule'
-        run: ./sc-app-deploy.py master ${{ github.event.inputs.team-no }} ${{ github.event.inputs.ticket-id }}
+        run: ./sc-app-deploy.py --deployhost team --branchprefix master --teamnumber ${{ github.event.inputs.team-no }} --imageversion ${{ github.event.inputs.tag-qualifier }}

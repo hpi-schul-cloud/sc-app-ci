@@ -74,33 +74,24 @@ def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
 
     # TODO: Inform RocketChat
 
-def deployImages(branch, args):
+def deployImages(branch, deployhost, teamnumber, imagequalifier):
     """ deployImages
     The function loops of the sc_image_list dictionary 
     and call deployImage if the tag for the application images exist on the docker registry
     """
-    logging.info("Image deployment triggered for %s" % args)
+    logging.info("Image deployment triggered on {} for {} of team {}".format(branch, imagequalifier, teamnumber))
     testmode = os.environ.get("TESTMODE")
     tag_middle = ''
     # Branch prefix and "latest" qualifier must be lowercase
-    branch = str(branch).lower()
     tag_qualifier = "latest".lower()
-    
-    if hasattr(args, "ticket_id"):
-        if branch == 'release' or branch == 'master':
-            # Version spezification is with loer case letters
-            tag_middle = ('_' + args.ticket_id).lower()
-        else:
-            # Ticket ID will be always in uppercase letters
-            tag_middle = ('_' + args.ticket_id).upper()
-    tag_to_deploy = branch + tag_middle + "_" + tag_qualifier
-    if hasattr(args, "scheduled") and args.scheduled == True and (testmode == None):
+
+    if deployhost == 'test' and (testmode == None):
         # Deploy to the test host
         deployHost = Host(auto_host_name , auto_target_postfix)
     else:
-        # Deploy to the team host
-        deployHost = Host("%s%d" % (team_host_name_prefix, args.team_number) , team_target_postfix)
-    logging.info("Deployment triggered for {} branch on {}".format(branch, args.team_number))
+        tag_middle = '_' + imagequalifier
+        deployHost = Host("%s%d" % (team_host_name_prefix, teamnumber) , team_target_postfix)
+    tag_to_deploy = branch + tag_middle + "_" + tag_qualifier
     decryptedSshKeyFile = None
     if sad_secrets.secret_helper.isPassphraseSet():
         decryptedSshKeyFile="travisssh"

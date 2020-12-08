@@ -29,65 +29,38 @@ def parseArguments():
     '''
     parser = argparse.ArgumentParser(description='Deploy branch specific images of Schul-Cloud to a team assigned Docker Swarm machine.'
             , add_help=True
-            , epilog="Get individual help for a branch prefix by adding --help to the branch."
     )
-
-    parser.add_argument('--version', action='version', version='1.1.0')
-    def add_standard_args(parser, args_to_add):
-        # each command has a slightly different use of these arguments,
-        # therefore just add the ones specified in `args_to_add`.
-        if 'team_number' in args_to_add:
-            parser.add_argument('team_number',
-                                type=int,
-                                help='the number of the team to identify the team machine')
-        if 'ticket_id' in args_to_add:
-            parser.add_argument('ticket_id',
-                            type=str,
-                            help='JIRA issue ID to identify the branch')
-        if 'scheduled' in args_to_add:
-            parser.add_argument('--scheduled',
-                                action='store_true', default=False,
-                                help='script is called by automatic scheduler')
-
-    subp = parser.add_subparsers(required=False)
-
-    # develop PARSER
-    develop_parser = subp.add_parser('develop',
-                                      description='Deploy latest images from develop branch')
-    add_standard_args(develop_parser,
-                      ('scheduled', 'team_number'))
-    develop_parser.set_defaults(func=deployImages)
-
-    # master PARSER
-    master_parser = subp.add_parser('master',
-                                      description='Deploy latest images from master branch')
-    add_standard_args(master_parser,
-                      ('team_number', 'ticket_id'))
-    master_parser.set_defaults(func=deployImages)
-
-    # release PARSER
-    release_parser = subp.add_parser('release',
-                                      description='Deploy latest images from release branch')
-    add_standard_args(release_parser,
-                      ('team_number', 'ticket_id'))
-    release_parser.set_defaults(func=deployImages)
-    # hotfix PARSER
-    hotfix_parser = subp.add_parser('hotfix',
-                                      description='Deploy latest images from hotfix branch of team')
-    add_standard_args(hotfix_parser,
-                      ('team_number', 'ticket_id'))
-    hotfix_parser.set_defaults(func=deployImages)
-
-    # feature PARSER
-    feature_parser = subp.add_parser('feature',
-                                      description='Deploy latest images from feature branch of team')
-    add_standard_args(feature_parser,
-                      ('team_number', 'ticket_id'))
-    feature_parser.set_defaults(func=deployImages)
-
+    parser.add_argument('--version', action='version', version='1.1.0', help='Prints the script version')
+    parser.add_argument('--branchprefix', type=str, choices=['feature','develop', 'release', 'master', 'hotfix'], required=True, help='Branch prefix to deploy')
+    parser.add_argument('--deployhost', type=str, choices=['test', 'team'], required=True, help='Destination host for deployment')
+    parser.add_argument('--teamnumber', type=int, help='the number of the team to identify the team machine')
+    parser.add_argument('--jiraid', type=str, help='JIRA issue ID to identify the branch')
+    parser.add_argument('--imageversion',type=str, help='JIRA issue ID to identify the branch')
     args = parser.parse_args()
     return args
-    
+
+def checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion):
+    imagequalifier = ''
+    if deployhost == 'test':
+        # Deploy to the test host, just develop is supported
+        if branchprefix != 'develop':
+            raise Exception("Branch prefix 'develop' only is supported with deployhost 'test'")    
+    else:
+        # Deploy to the team host
+        if branchprefix == 'release' or branchprefix == 'master':
+            if imageversion != None:
+                # Version spezification has to be with loer case letters
+                imagequalifier = imageversion.lower()
+            else:
+                raise Exception("No imageversion is specified for branchprefix '{}'".format(branchprefix))
+        else:
+            if jiraid != None:
+                # Ticket ID will be always in uppercase letters
+                imagequalifier = jiraid.upper()
+            else:
+                raise Exception("No jiraid is specified for branchprefix '{}'".format(branchprefix))
+    return imagequalifier
+
 
 if __name__ == '__main__':
     try:
@@ -103,10 +76,13 @@ if __name__ == '__main__':
         initLogging()
         parsedArgs = parseArguments()
         logging.info('Call arguments given: %s' % sys.argv[1:])
-        if hasattr(parsedArgs, 'func'):
-            parsedArgs.func(sys.argv[1], parsedArgs)
-        else:
-            logging.info("No command given, exiting ...")
+        deployhost   = parsedArgs['deployhost']
+        branchprefix = parsedArgs['branchprefix']
+        jiraid = parsedArgs['jiraid']
+        imageversion = parsedArgs['imageversion']
+        teamnumber = parsedArgs['teamnumber']
+        imagequalifier = checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion)
+        deployImages(deployhost, branchprefix, teamnumber, imagequalifier)
     except Exception as ex:
         logging.exception(ex)
         logging.info("Deployment failed.")
