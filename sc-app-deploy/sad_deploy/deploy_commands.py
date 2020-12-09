@@ -74,7 +74,7 @@ def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
 
     # TODO: Inform RocketChat
 
-def deployImages(branch, deployhost, teamnumber, imagequalifier):
+def deployImages(deployhost, branch, teamnumber, imagequalifier):
     """ deployImages
     The function loops of the sc_image_list dictionary 
     and call deployImage if the tag for the application images exist on the docker registry
@@ -89,7 +89,8 @@ def deployImages(branch, deployhost, teamnumber, imagequalifier):
         # Deploy to the test host
         deployHost = Host(auto_host_name , auto_target_postfix)
     else:
-        tag_middle = '_' + imagequalifier
+        if imagequalifier != '':
+            tag_middle = '_' + imagequalifier
         deployHost = Host("%s%d" % (team_host_name_prefix, teamnumber) , team_target_postfix)
     tag_to_deploy = branch + tag_middle + "_" + tag_qualifier
     decryptedSshKeyFile = None

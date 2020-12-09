@@ -76,11 +76,11 @@ if __name__ == '__main__':
         initLogging()
         parsedArgs = parseArguments()
         logging.info('Call arguments given: %s' % sys.argv[1:])
-        deployhost   = parsedArgs['deployhost']
-        branchprefix = parsedArgs['branchprefix']
-        jiraid = parsedArgs['jiraid']
-        imageversion = parsedArgs['imageversion']
-        teamnumber = parsedArgs['teamnumber']
+        deployhost   = parsedArgs.deployhost
+        branchprefix = parsedArgs.branchprefix
+        jiraid = parsedArgs.jiraid
+        imageversion = parsedArgs.imageversion
+        teamnumber = parsedArgs.teamnumber
         imagequalifier = checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion)
         deployImages(deployhost, branchprefix, teamnumber, imagequalifier)
     except Exception as ex:
