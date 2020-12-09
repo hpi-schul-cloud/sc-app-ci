@@ -53,7 +53,9 @@ def checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion):
                 imagequalifier = imageversion.lower()
             else:
                 raise Exception("No imageversion is specified for branchprefix '{}'".format(branchprefix))
-        else:
+        elif branchprefix == 'develop':
+                pass
+        else: # feature or hotfix
             if jiraid != None:
                 # Ticket ID will be always in uppercase letters
                 imagequalifier = jiraid.upper()

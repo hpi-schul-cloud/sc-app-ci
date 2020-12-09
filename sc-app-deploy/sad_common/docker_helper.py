@@ -18,13 +18,13 @@ class DockerRegistry:
                  returns true if tag exists, otherwise false
     '''
     base_url = "https://hub.docker.com/v2"
-    auth_headers = ""
-
+    
     def __init__(self, namespace):
         """
         The namespace like 'schucloud'.
         """
         self.docker_namespace = namespace
+        self.auth_headers = ''
 
     def dockerRegistryLogin(self):
         """
