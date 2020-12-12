@@ -35,7 +35,7 @@ def parseArguments():
     parser.add_argument('--deployhost', type=str, choices=['test', 'team'], required=True, help='Destination host for deployment')
     parser.add_argument('--teamnumber', type=int, help='the number of the team to identify the team machine')
     parser.add_argument('--jiraid', type=str, help='JIRA issue ID to identify the branch')
-    parser.add_argument('--imageversion',type=str, help='JIRA issue ID to identify the branch')
+    parser.add_argument('--imageversion',type=str, help='Version number to identify the branch')
     args = parser.parse_args()
     return args
 
