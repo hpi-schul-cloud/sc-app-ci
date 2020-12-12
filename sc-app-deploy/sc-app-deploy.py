@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 '''
-This script deploys / updates the docker image tagged with "develop_latest" for the applications "schulcloud-server", "schulcloud-client" 
-and "schulcloud-nuxt-client" to the staging server.
+This script deploys / updates manually the docker images of branches if started with the ticket-id as first parameter, 
+all branches tagged "latest" for the applications "schulcloud-server", "schulcloud-client" 
+and "schulcloud-nuxt-client" on the destination environment (i.a. reused hotfix or staging server) identified with the team number as second parameter.
 
 The script is prepared to easily switch deployment to another host. The remote user "travis" must be available on the
 remote host. The remote host must be prepared with docker swarm.
@@ -16,77 +17,74 @@ means you can use this script locally for development purposes, if your personal
 
 import sys
 import os
-import subprocess
 import logging
-from contextlib import redirect_stdout
+import argparse
 
-from sad_common.run_command import runCommand
 from sad_common.sad_logging import initLogging
-from sad_infra.application import Application
-from sad_infra.host import Host
-import sad_secrets.secret_helper
+from sad_deploy.deploy_commands import deployImages
 
-def deploy(application: Application, host: Host, decryptedSshKeyFile: str):
+def parseArguments():
     '''
-    Deploys the application to the given host.
+    Parses the program arguments and returns the data parsed by argparse.
     '''
-    logging.info("Deploying '%s'..." % application.getSwarmServicename(host))
+    parser = argparse.ArgumentParser(description='Deploy branch specific images of Schul-Cloud to a team assigned Docker Swarm machine.'
+            , add_help=True
+    )
+    parser.add_argument('--version', action='version', version='1.1.0', help='Prints the script version')
+    parser.add_argument('--branchprefix', type=str, choices=['feature','develop', 'release', 'master', 'hotfix'], required=True, help='Branch prefix to deploy')
+    parser.add_argument('--deployhost', type=str, choices=['test', 'team'], required=True, help='Destination host for deployment')
+    parser.add_argument('--teamnumber', type=int, help='the number of the team to identify the team machine')
+    parser.add_argument('--jiraid', type=str, help='JIRA issue ID to identify the branch')
+    parser.add_argument('--imageversion',type=str, help='Version number to identify the branch')
+    args = parser.parse_args()
+    return args
 
-    remoteUser = "travis"
-
-    sshCommand=['ssh']
-
-    # Disable known hosts checking.
-    sshOptions=['-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null']
-
-    if decryptedSshKeyFile != None:
-        # Use provided ssh key
-        sshIdentity=['-i', decryptedSshKeyFile]
+def checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion):
+    imagequalifier = ''
+    if deployhost == 'test':
+        # Deploy to the test host, just develop is supported
+        if branchprefix != 'develop':
+            raise Exception("Branch prefix 'develop' only is supported with deployhost 'test'")    
     else:
-        # Try pageant
-        sshIdentity=[]
+        # Deploy to the team host
+        if branchprefix == 'release' or branchprefix == 'master':
+            if imageversion != None:
+                # Version spezification has to be with loer case letters
+                imagequalifier = imageversion.lower()
+            else:
+                raise Exception("No imageversion is specified for branchprefix '{}'".format(branchprefix))
+        elif branchprefix == 'develop':
+                pass
+        else: # feature or hotfix
+            if jiraid != None:
+                # Ticket ID will be always in uppercase letters
+                imagequalifier = jiraid.upper()
+            else:
+                raise Exception("No jiraid is specified for branchprefix '{}'".format(branchprefix))
+    return imagequalifier
 
-    # remote = <build user>@<hostname>.schul-cloud.dev
-    sshRemote=['%s@%s' % (remoteUser, host.getFQDN())]
-
-    # The remote command parameters.
-    # image = <imagename>:<imagetag> = <repository name>:<tag>
-    # service name = <hostname>_<applicationname short>. See 'docker service ls'
-    sshRemoteCommandParameters=[application.getImage(), application.getSwarmServicename(host)]
-
-    command = sshCommand + sshOptions + sshIdentity + sshRemote + sshRemoteCommandParameters
-    logging.info("Running command: '%s'" % ' '.join(command))
-
-    # Run docker service update
-    # Example call: ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i travisssh travis@hotfix6.schul-cloud.dev schulcloud/schulcloud-server:develop_latest hotfix6_server
-    # Example execution: /usr/bin/docker service update --force --image schulcloud/schulcloud-server:develop_latest hotfix6_server
-    runCommand(command)
-    #runCommand(['ls'])
-    logging.info("Deployment '%s' complete." % application.getSwarmServicename(host))
-
-    # TODO: Inform RocketChat
 
 if __name__ == '__main__':
     try:
+        if sys.version_info[0] < 3 or sys.version_info[1] < 6:
+            print("This script requires Python version 3.6")
+            print("Python version")
+            print (sys.version)
+            print("Version info.")
+            print (sys.version_info)          
+            print(os.environ['PATH'])
+            sys.exit(1)
+
         initLogging()
+        parsedArgs = parseArguments()
         logging.info('Call arguments given: %s' % sys.argv[1:])
-
-        decryptedSshKeyFile = None
-        if sad_secrets.secret_helper.isPassphraseSet():
-            decryptedSshKeyFile="travisssh"
-            sad_secrets.secret_helper.gpgDecrypt(decryptedSshKeyFile)
-        else:
-            logging.info("Passphrase not set in CI_GITHUB_TRAVISUSER_SWARMVM_KEY. Using ssh identity of the currently logged in user.")
-
-        # Deploy to the hotfix6 host
-        deployHost = Host("test", "schul-cloud.org")
-
-        deploy(Application("server", "schulcloud/schulcloud-server", "develop_latest"), deployHost, decryptedSshKeyFile)
-        deploy(Application("client", "schulcloud/schulcloud-client", "develop_latest"), deployHost, decryptedSshKeyFile)
-        deploy(Application("nuxtclient", "schulcloud/schulcloud-nuxt-client", "develop_latest"), deployHost, decryptedSshKeyFile)
-        deploy(Application("calendar", "schulcloud/schulcloud-calendar", "develop_latest"), deployHost, decryptedSshKeyFile)
-        
-        exit(0)
+        deployhost   = parsedArgs.deployhost
+        branchprefix = parsedArgs.branchprefix
+        jiraid = parsedArgs.jiraid
+        imageversion = parsedArgs.imageversion
+        teamnumber = parsedArgs.teamnumber
+        imagequalifier = checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion)
+        deployImages(deployhost, branchprefix, teamnumber, imagequalifier)
     except Exception as ex:
         logging.exception(ex)
         logging.info("Deployment failed.")

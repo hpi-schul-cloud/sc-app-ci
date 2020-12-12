@@ -30,4 +30,4 @@ def initLogging():
     consoleHandler.setLevel(logging.INFO)
     rootLogger.addHandler(consoleHandler)
     
-    logging.info('Logging initialized')
+    logging.debug('Logging initialized')
