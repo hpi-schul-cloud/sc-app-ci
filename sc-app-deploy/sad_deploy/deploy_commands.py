@@ -34,8 +34,8 @@ sc_image_list = [
     {'image_name': "schulcloud-nuxt-storybook", 'application_name': "storybook"},
     {'image_name': "schulcloud-nuxt-vuepress", 'application_name': "vuepress"},
     {'image_name': "schulcloud-calendar", 'application_name': "calendar" },
-    {'image_name': "schulcloud-avcheck-scanfile", 'application_name': "scanfile"},
-    {'image_name': "schulcloud-avcheck-webserver", 'application_name': "webserver"}
+    {'image_name': "schulcloud-avcheck-scanfile", 'application_name': "webserver"},
+    {'image_name': "schulcloud-avcheck-webserver", 'application_name': "scanfile"}
 ]
 
 def deployImage(application: Application, host: Host, decryptedSshKeyFile: str):
