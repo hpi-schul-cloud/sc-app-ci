@@ -12,10 +12,6 @@ on:
   repository_dispatch:
     # SC-apps send repository dispatch event
     inputs:
-      event_type:
-        description: "event_type for repository_dispatch"
-        required: true
-        default: "build_application"
       branch-prefix:
         description: "The branch prefix to use. Either feature|develop|release|hotfix|master"
         required: true
