@@ -5,7 +5,7 @@
 #   team-no       : the team number to identify the machine hotfix<team-no>.schul-cloud.dev
 #   ticket-id     : either the JIRA ticket-id used in the branch or the version numer for release and master branches
 
-name: sc-app-deploy
+name: sc-app-deploy-release-staging
 
 # Controls when the action will run.
 on:
