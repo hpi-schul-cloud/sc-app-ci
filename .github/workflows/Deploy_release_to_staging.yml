@@ -47,8 +47,9 @@ jobs:
       - name: Echo parameter
         run: |
           echo "GITHUB event trigger: ${{ github.event_name }}"
-          echo "GITHUB input sc-app:  ${{ github.event.inputs.sc-app }}"
-          echo "GITHUB input version-qualifier: ${{ github.event.version-qualifier }}"
+          echo "GITHUB input sc-app:  ${{ github.event.client_payload.branch-prefix }}"
+          echo "GITHUB input sc-app:  ${{ github.event.client_payload.sc-app }}"
+          echo "GITHUB input version-qualifier: ${{ github.event.client_payload.version-qualifier }}"
 
       - name: Display working directory
         # Just for failure analysis to track down possible issues occurring for invalid host configurations
