@@ -64,7 +64,7 @@ jobs:
           chmod a+x ./sc-app-deploy.py
         shell: bash
       - name: cancel workflow if Version of NEXT_RELEASE is NOT VERSION
-        if: ${{ NEXT_RELEASE == github.event.client_payload.VERSION }}
+        if: NEXT_RELEASE == github.event.client_payload.VERSION
         uses: andymckay/cancel-action@0.2
 
       # Run the deployment to hotfix6 for testing with feature-branch
