@@ -36,6 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Setting environment variables here make them available for all steps
+      CI_GITHUB_TRAVISUSER_SWARMVM_KEY: ${{ secrets.CI_GITHUB_TRAVISUSER_SWARMVM_KEY }}
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
     defaults:
