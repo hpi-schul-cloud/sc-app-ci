@@ -24,10 +24,6 @@ on:
         description: "version of app"
         required: false
         default: ""
-      NEXT_RELEASE:
-        description: "version of next Release"
-        required: false
-        default: ""
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # This workflow contains a single job called "deploy"
@@ -54,7 +50,6 @@ jobs:
           echo "GITHUB input GIT_BRANCH:  ${{ github.event.client_payload.GIT_BRANCH }}"
           echo "GITHUB input TRIGGER_REPOSITORY:  ${{ github.event.client_payload.TRIGGER_REPOSITORY }}"
           echo "GITHUB input app VERSION: ${{ github.event.client_payload.VERSION }}"
-          echo "Travis env NEXT_RELEASE: ${{ github.event.client_payload.NEXT_RELEASE }}"
           echo "GITHUB NEXT_RELEASE:${{ secrets.NEXT_RELEASE }}"
 
       - name: Display working directory
