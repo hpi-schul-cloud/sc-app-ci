@@ -70,7 +70,7 @@ jobs:
             echo IS_RELEASE_VERSION="true" >> $GITHUB_ENV
           else
             echo "workflow will abort: release version is NOT version of NEXT_RELEASE. No deployment to staging."
-          elif
+          fi
 
       # - name: cancel workflow if Version of NEXT_RELEASE NOT meets VERSION
       #   if: IS_RELEASE_VERSION != "true"
