@@ -72,9 +72,9 @@ jobs:
             echo "workflow will abort: release version is NOT version of NEXT_RELEASE. No deployment to staging."
           elif
 
-      - name: cancel workflow if Version of NEXT_RELEASE NOT meets VERSION
-        if: IS_RELEASE_VERSION != "true"
-        uses: andymckay/cancel-action@0.2
+      # - name: cancel workflow if Version of NEXT_RELEASE NOT meets VERSION
+      #   if: IS_RELEASE_VERSION != "true"
+      #   uses: andymckay/cancel-action@0.2
 
       # Run the deployment to hotfix6 for testing with feature-branch
       # set Branch Prefix
