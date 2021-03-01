@@ -63,7 +63,7 @@ jobs:
         run: |
           APP_VERSION=$( echo ${{ github.event.client_payload.VERSION }} | tr -s "-" "."  )
           echo APP_VERSION:"$APP_VERSION"
-          if [ $APP_VERSION =~ ${{ secrets.NEXT_RELEASE }} ] && [ "$TRAVIS_BRANCH" == ^"release"* ]
+          if [[ $APP_VERSION == ${{ secrets.NEXT_RELEASE }} ]]
           then
             IS_RELEASE_VERSION="true"
             echo "IS_RELEASE_VERSION is true"
