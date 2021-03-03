@@ -24,6 +24,9 @@ team_host_name_prefix = "hotfix"
 # DNS parts for scheduled deployment
 auto_target_postfix = "schul-cloud.org"
 auto_host_name = "test"
+# DNS parts for deployment on dispatch event
+dispatch_target_postfix = "schul-cloud.org"
+dispatch_host_name = "staging"
 # Works currently for images of the specified namespace only
 docker_namespace = "schulcloud"
 # Dictionary of the applications which will be tried to deploy
@@ -92,6 +95,9 @@ def deployImages(deployhost, branch, teamnumber, imagequalifier):
     if deployhost == 'test' and (testmode == None):
         # Deploy to the test host
         deployHost = Host(auto_host_name , auto_target_postfix)
+    elif deployhost == 'staging' and (testmode == None):
+        # Deploy to the staging host
+        deployHost = Host(dispatch_host_name , dispatch_target_postfix)
     else:
         if imagequalifier != '':
             tag_middle = '_' + imagequalifier

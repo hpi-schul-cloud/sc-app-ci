@@ -45,6 +45,15 @@ def checkArgs(deployhost, branchprefix, teamnumber, jiraid, imageversion):
         # Deploy to the test host, just develop is supported
         if branchprefix != 'develop':
             raise Exception("Branch prefix 'develop' only is supported with deployhost 'test'")    
+    elif deployhost == 'staging':
+        # Deploy to the staging host, just release with matching NEXT_VERSION is supported
+        if branchprefix != 'release':
+            raise Exception("deployhost 'staging' is only supported with Branch prefix 'release'")
+        if imageversion != None:
+            # Version spezification has to be with loer case letters
+            imagequalifier = imageversion.lower()
+        else:
+            raise Exception("No imageversion is specified for branchprefix '{}'".format(branchprefix))
     else:
         # Deploy to the team host
         if branchprefix == 'release' or branchprefix == 'master':

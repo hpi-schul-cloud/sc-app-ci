@@ -76,13 +76,8 @@ jobs:
         if: ${{ env.IS_RELEASE_VERSION == 'false' }}
         uses: andymckay/cancel-action@0.2
       
-      # Run the deployment to hotfix6 for testing with feature-branch
-      # set Branch Prefix
-
-      - name: Running feature deployment for hotfix
-       # if: github.event.client_payload.VERSION == secrets.NEXT_RELEASE
-        run: ./sc-app-deploy.py --deployhost team --branchprefix feature --teamnumber 6 --jiraid OPS-1559
-
-      # Add deploy next release to staging
-      # add staging host to ./sc-app-deploy.py
+      # Run the deployment next release to staging
  
+      - name: Running release deployment to staging
+       # if: github.event.client_payload.VERSION == secrets.NEXT_RELEASE
+        run: ./sc-app-deploy.py --deployhost staging --branchprefix release --imageversion "v"$APP_VERSION
