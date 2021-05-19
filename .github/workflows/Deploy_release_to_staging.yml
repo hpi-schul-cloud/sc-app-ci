@@ -80,4 +80,6 @@ jobs:
  
       - name: Running release deployment to staging
        # if: github.event.client_payload.VERSION == secrets.NEXT_RELEASE
-        run: ./sc-app-deploy.py --deployhost staging --branchprefix release --imageversion "v"$APP_VERSION
+        run: |
+          APP_VERSION_DEPLOY=$( echo "v"${{ github.event.client_payload.VERSION }} | tr -s "-" "."  )
+          ./sc-app-deploy.py --deployhost staging --branchprefix release --imageversion $APP_VERSION_DEPLOY
