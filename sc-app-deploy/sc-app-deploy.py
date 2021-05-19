@@ -32,7 +32,7 @@ def parseArguments():
     )
     parser.add_argument('--version', action='version', version='1.1.0', help='Prints the script version')
     parser.add_argument('--branchprefix', type=str, choices=['feature','develop', 'release', 'master', 'hotfix'], required=True, help='Branch prefix to deploy')
-    parser.add_argument('--deployhost', type=str, choices=['test', 'team','release'], required=True, help='Destination host for deployment')
+    parser.add_argument('--deployhost', type=str, choices=['test', 'team','staging'], required=True, help='Destination host for deployment')
     parser.add_argument('--teamnumber', type=int, help='the number of the team to identify the team machine')
     parser.add_argument('--jiraid', type=str, help='JIRA issue ID to identify the branch')
     parser.add_argument('--imageversion',type=str, help='Version number to identify the branch')
