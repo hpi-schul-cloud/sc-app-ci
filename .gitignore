@@ -3,3 +3,4 @@ sc-app-deploy/log
 log
 **/__pycache__/**
 travisssh
+delalias.sh
