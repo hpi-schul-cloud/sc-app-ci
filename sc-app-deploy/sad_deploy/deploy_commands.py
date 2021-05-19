@@ -94,14 +94,16 @@ def deployImages(deployhost, branch, teamnumber, imagequalifier):
 
     if deployhost == 'test' and (testmode == None):
         # Deploy to the test host
-        deployHost = Host(auto_host_name , auto_target_postfix)
+        deploy_host = Host(auto_host_name , auto_target_postfix)
     elif deployhost == 'staging' and (testmode == None):
         # Deploy to the staging host
-        deployHost = Host(dispatch_host_name , dispatch_target_postfix)
+        deploy_host = Host(dispatch_host_name , dispatch_target_postfix)
+        if imagequalifier != '':
+            tag_middle = '_' + imagequalifier
     else:
         if imagequalifier != '':
             tag_middle = '_' + imagequalifier
-        deployHost = Host("%s%d" % (team_host_name_prefix, teamnumber) , team_target_postfix)
+        deploy_host = Host("%s%d" % (team_host_name_prefix, teamnumber) , team_target_postfix)
     tag_to_deploy = branch + tag_middle + "_" + tag_qualifier
     decryptedSshKeyFile = None
     if sad_secrets.secret_helper.isPassphraseSet():
@@ -115,7 +117,7 @@ def deployImages(deployhost, branch, teamnumber, imagequalifier):
     for sc_image in sc_image_list:
         if drh.dockerRegistryCheckTag(sc_image['image_name'], tag_to_deploy):
             app = Application(sc_image['application_name'], docker_namespace + '/' + sc_image['image_name'], tag_to_deploy)
-            deployImage(app, deployHost, decryptedSshKeyFile)
+            deployImage(app, deploy_host, decryptedSshKeyFile)
             no_images_deployed += 1
     if no_images_deployed == 0:
         # Without checking that at least on tag has been deploy the abort of the calling job would not be possible
