@@ -10,9 +10,9 @@ name: sc-app-deploy
 
 # Controls when the action will run.
 on:
-  schedule:
+  # schedule:
     # At midnight every day
-    - cron: "0 0 * * *"
+  #  - cron: "0 0 * * *"
   workflow_dispatch:
     # Manual invocation
     inputs:
